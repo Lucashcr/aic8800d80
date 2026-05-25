@@ -22,11 +22,8 @@ ACTION=="add", ATTRS{idVendor}=="a69c", ATTRS{idProduct}=="8d83", RUN+="/bin/sh 
 ACTION=="add", ATTRS{idVendor}=="368b", ATTRS{idProduct}=="8d81", RUN+="/bin/sh -c 'echo 368b 8d81 > /sys/bus/usb/drivers/aic8800_fdrv/new_id 2>/dev/null || true'"
 
 # --- Bluetooth Driver Binding ---
-# PID 8d81 (Radxa fw with BT enabled) exposes BT interfaces.
-# If aic_btusb doesn't auto-bind, add the VID:PID dynamically.
-ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="a69c", ATTRS{idProduct}=="8d81", ATTR{bInterfaceClass}=="e0", ATTR{bInterfaceSubClass}=="01", ATTR{bInterfaceProtocol}=="01", RUN+="/bin/sh -c 'echo a69c 8d81 > /sys/bus/usb/drivers/aic_btusb/new_id 2>/dev/null || true'"
-ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="a69c", ATTRS{idProduct}=="8d83", ATTR{bInterfaceClass}=="e0", ATTR{bInterfaceSubClass}=="01", ATTR{bInterfaceProtocol}=="01", RUN+="/bin/sh -c 'echo a69c 8d83 > /sys/bus/usb/drivers/aic_btusb/new_id 2>/dev/null || true'"
-ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="368b", ATTRS{idProduct}=="8d81", ATTR{bInterfaceClass}=="e0", ATTR{bInterfaceSubClass}=="01", ATTR{bInterfaceProtocol}=="01", RUN+="/bin/sh -c 'echo 368b 8d81 > /sys/bus/usb/drivers/aic_btusb/new_id 2>/dev/null || true'"
+# btusb auto-binds to the BT interface (class 0xe0/0x01/0x01) via its built-in
+# USB device table — no new_id push is needed.
 
 # Unblock rfkill for Bluetooth
 ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="a69c", ATTRS{idProduct}=="8d81", RUN+="/bin/sh -c 'rfkill unblock bluetooth 2>/dev/null || true'"

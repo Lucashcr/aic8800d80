@@ -292,7 +292,7 @@ install_firmware() {
     # Install usb_modeswitch configuration
     local modeswitch_source="${SCRIPT_DIR}/usb_modeswitch/1111_1111"
     local modeswitch_dest="/etc/usb_modeswitch.d/1111:1111"
-    
+
     if [ -f "$modeswitch_source" ]; then
         print_info "Installing usb_modeswitch configuration to $modeswitch_dest..."
         mkdir -p /etc/usb_modeswitch.d >> "$LOG_FILE" 2>&1 || true
@@ -301,7 +301,30 @@ install_firmware() {
     else
         print_warning "USB modeswitch configuration file not found: $modeswitch_source"
     fi
-    
+
+    # Remove any orphaned aic_btusb.ko left by previous manual installs.
+    # The DKMS package only builds aic8800_fdrv and aic_load_fw; aic_btusb is
+    # deprecated (targets Android BlueDroid) and must not load on Linux/BlueZ.
+    local orphan_btusb="/lib/modules/$(uname -r)/kernel/drivers/net/wireless/aic8800/aic_btusb.ko"
+    if [ -f "$orphan_btusb" ]; then
+        print_info "Removing deprecated aic_btusb.ko..."
+        rm -f "$orphan_btusb" >> "$LOG_FILE" 2>&1
+    fi
+    # Remove stale blacklist entry (not needed since aliases now point to btusb)
+    rm -f /etc/modprobe.d/blacklist-aic_btusb.conf >> "$LOG_FILE" 2>&1 || true
+
+    # Install modprobe configuration for Bluetooth
+    local modprobe_source="${SCRIPT_DIR}/modprobe/aic8800-bt.conf"
+    local modprobe_dest="/etc/modprobe.d/aic8800-bt.conf"
+
+    if [ -f "$modprobe_source" ]; then
+        print_info "Installing modprobe configuration to $modprobe_dest..."
+        cp "$modprobe_source" "$modprobe_dest" >> "$LOG_FILE" 2>&1
+        print_success "Modprobe configuration installed successfully."
+    else
+        print_warning "Modprobe configuration file not found: $modprobe_source"
+    fi
+
     print_success "Firmware installed successfully."
 }
 
